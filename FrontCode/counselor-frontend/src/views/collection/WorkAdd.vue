@@ -140,7 +140,7 @@ function handleSubmit() {
 </script>
 
 <style scoped lang="scss">
-.add-page { min-height: 100%; background: #f5f5f5; display: flex; flex-direction: column; }
+.add-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; display: flex; flex-direction: column; z-index: 10; }
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; flex-shrink: 0; .nav-title { font-size: 15px; font-weight: 600; } .nav-spacer { width: 20px; } .back-btn { cursor: pointer; display: flex; align-items: center; } }
 .form-body { flex: 1; overflow-y: auto; padding: 14px; padding-bottom: 80px; }
 
@@ -156,7 +156,7 @@ function handleSubmit() {
   input[type="date"] { color-scheme: light; }
 }
 
-.bottom-actions { position: sticky; bottom: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; }
+.bottom-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; }
 .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
 .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; }
 .submit-btn { background: #e74c3c; border: none; color: #fff; }

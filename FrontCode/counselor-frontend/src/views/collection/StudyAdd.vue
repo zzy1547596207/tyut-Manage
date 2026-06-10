@@ -89,9 +89,9 @@ function handleSubmit() {
 </script>
 
 <style scoped lang="scss">
-.add-page { min-height: 100%; background: #f5f5f5; display: flex; flex-direction: column; }
+.add-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; display: flex; flex-direction: column; z-index: 10; }
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; flex-shrink: 0; .nav-title { font-size: 15px; font-weight: 600; } .nav-spacer { width: 20px; } .back-btn { cursor: pointer; display: flex; align-items: center; } }
 .form-body { flex: 1; overflow-y: auto; padding: 14px; padding-bottom: 80px; }
 .field { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 10px; label { display: block; font-size: 13px; color: #333; margin-bottom: 8px; font-weight: 500; } .star { color: #e74c3c; font-weight: bold; } select, input { width: 100%; height: 40px; border: 1px solid #eee; border-radius: 6px; padding: 0 12px; font-size: 13px; color: #333; background: #fff; outline: none; appearance: none; &:focus { border-color: #e74c3c; } } input[type="date"] { color-scheme: light; } }
-.bottom-actions { position: sticky; bottom: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
+.bottom-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
 </style>

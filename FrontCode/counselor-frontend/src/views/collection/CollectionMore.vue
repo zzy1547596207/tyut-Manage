@@ -1,77 +1,65 @@
 <template>
   <div class="more-page">
-    <div class="menu-list">
-      <div class="menu-item" @click="showRoleSheet = true">
-        <div class="menu-icon" style="background:#e3f2fd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#1976D2" stroke-width="2" width="22" height="22">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-        </div>
-        <span class="menu-label">角色切换</span>
-        <span class="menu-arrow">&gt;</span>
-      </div>
+    <div class="page-title">更多功能</div>
 
-      <div class="menu-item" @click="router.push('/collection/approval/history')">
-        <div class="menu-icon" style="background:#fff3e0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#F57C00" stroke-width="2" width="22" height="22">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-        </div>
-        <span class="menu-label">信息采集计划审批记录</span>
-        <span class="menu-arrow">&gt;</span>
+    <div class="func-grid">
+      <div class="func-item" v-for="item in functions" :key="item.label" @click="item.action">
+        <div class="func-icon" :style="{ background: item.color }">{{ item.icon }}</div>
+        <span>{{ item.label }}</span>
       </div>
     </div>
 
-    <div v-if="showRoleSheet" class="overlay" @click.self="showRoleSheet = false">
-      <div class="role-sheet">
-        <div class="sheet-header">
-          <span class="sheet-title">角色切换</span>
-          <span class="sheet-close" @click="showRoleSheet = false">×</span>
-        </div>
-        <div class="sheet-body">
-          <div class="role-btn" :class="{ active: currentRole === 'COUNSELOR' }" @click="doSwitch('COUNSELOR')">发展辅导员角色</div>
-          <div class="role-btn" :class="{ active: currentRole === 'DEPARTMENT' }" @click="doSwitch('DEPARTMENT')">发展学院角色</div>
-          <div class="role-btn" :class="{ active: currentRole === 'ADMIN' }" @click="doSwitch('ADMIN')">发展管理员角色</div>
-        </div>
-      </div>
-    </div>
+    <div class="tip">更多功能开发中…</div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '../../stores/user'
 
-const router = useRouter()
-const userStore = useUserStore()
-const showRoleSheet = ref(false)
-const currentRole = computed(() => userStore.role)
-const names = { COUNSELOR: '发展辅导员', DEPARTMENT: '发展学院', ADMIN: '发展管理员' }
-
-function doSwitch(role) {
-  userStore.switchRole(role)
-  showRoleSheet.value = false
-  ElMessage.success('已切换为：' + names[role])
-  if (role === 'DEPARTMENT' || role === 'ADMIN') { router.push('/college/review') }
-  else { router.push('/collection/batch') }
-}
+const functions = [
+  { label: '数据导出', icon: '📥', color: '#e3f2fd', action: () => ElMessage.info('功能开发中') },
+  { label: '通知公告', icon: '📢', color: '#fff3e0', action: () => ElMessage.info('功能开发中') },
+  { label: '操作记录', icon: '📋', color: '#e8f5e9', action: () => ElMessage.info('功能开发中') },
+  { label: '系统设置', icon: '⚙️', color: '#f3e5f5', action: () => ElMessage.info('功能开发中') },
+  { label: '意见反馈', icon: '💬', color: '#fce4ec', action: () => ElMessage.info('功能开发中') },
+  { label: '帮助中心', icon: '❓', color: '#e0f7fa', action: () => ElMessage.info('功能开发中') }
+]
 </script>
 
 <style scoped lang="scss">
-.more-page { }
-.menu-list { background: #fff; }
-.menu-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; &:active { background: #fafafa; } }
-.menu-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.menu-label { flex: 1; font-size: 14px; color: #333; margin-left: 12px; }
-.menu-arrow { color: #ccc; font-size: 16px; }
-.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 100; display: flex; align-items: flex-end; }
-.role-sheet { width: 100%; background: #fff; border-radius: 16px 16px 0 0; padding: 16px 16px 24px; animation: slideUp .25s ease; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.sheet-title { font-size: 16px; font-weight: 600; color: #333; }
-.sheet-close { font-size: 22px; color: #999; cursor: pointer; padding: 0 4px; }
-.sheet-body { display: flex; flex-direction: column; gap: 10px; }
-.role-btn { height: 46px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; cursor: pointer; border: 1.5px solid #e74c3c; background: #fff; color: #e74c3c; &.active { background: #e74c3c; color: #fff; } }
+.more-page { padding: 16px; }
+.page-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; }
+
+.func-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.func-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  .func-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+}
+
+.tip {
+  text-align: center;
+  color: #ccc;
+  font-size: 11px;
+  margin-top: 40px;
+}
 </style>

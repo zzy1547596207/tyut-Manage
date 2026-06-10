@@ -53,11 +53,12 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted, watch } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-const router = useRouter(); const route = useRoute(); const base = computed(() => route.path.startsWith('/college') ? '/college' : '/collection')
+const router = useRouter()
+const route = useRoute()
 const idPhoto = ref(null)
 const lifePhotos = ref([])
 const form = reactive({ education: '', workList: [], studyList: [] })
@@ -70,25 +71,24 @@ function loadExist() {
 watch(()=>route.path, loadExist)
 onMounted(loadExist)
 
-function goAddWork() { router.push(base.value + '/work/add') }
-function goAddStudy() { router.push(base.value + '/study/add') }
+function goAddWork() { router.push('/collection/work/add') }
+function goAddStudy() { router.push('/collection/study/add') }
 function uploadIdPhoto(){ const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(f&&f.size>10*1024*1024){ElMessage.warning('图片大小不能超过10M');return};if(f){const r=new FileReader();r.onload=ev=>idPhoto.value=ev.target.result;r.readAsDataURL(f)}};i.click() }
 function uploadLifePhoto(idx){ const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=e=>{const f=e.target.files[0];if(f&&f.size>10*1024*1024){ElMessage.warning('图片大小不能超过10M');return};if(f){const r=new FileReader();r.onload=ev=>lifePhotos.value[idx]=ev.target.result;r.readAsDataURL(f)}};i.click() }
-function handleCancel(){ router.push(base.value + '/batch') }
+function handleCancel(){ router.push('/collection/batch') }
 async function handleSubmit(){
   if(!form.education){ElMessage.warning('请选择最高学历');return}
   if(!idPhoto.value){ElMessage.warning('请上传证件照片');return}
   const bid=route.params.batchId
   const d={ idPhoto:idPhoto.value,lifePhotos:lifePhotos.value.filter(Boolean),education:form.education,workList:JSON.parse(JSON.stringify(form.workList)),studyList:JSON.parse(JSON.stringify(form.studyList)),submitTime:new Date().toLocaleString() }
   try{const sm=JSON.parse(localStorage.getItem('batch_status')||'{}');sm[bid]='reviewing';localStorage.setItem('batch_status',JSON.stringify(sm));localStorage.setItem('batch_data_'+bid,JSON.stringify(d))}catch(e){}
-  try{const raw=localStorage.getItem('college_applications');const apps=raw?JSON.parse(raw):[];apps.unshift({id:Date.now(),batchId:bid,counselorName:'辅导员',employeeNo:'11004',department:'A学院',type:'专职辅导员',position:'辅导员',applyTime:new Date().toLocaleString(),updateType:'采集填报',selected:false,expanded:false,changes:[{label:'批次',old:'',new:'2024年辅导员信息采集'},{label:'最高学历',old:'',new:form.education}]});localStorage.setItem('college_applications',JSON.stringify(apps))}catch(e){}
   await ElMessageBox.alert('信息采集提交成功！','提示',{type:'success'})
-  router.push(base.value + '/batch')
+  router.push('/collection/batch')
 }
 </script>
 
 <style scoped lang="scss">
-.form-page { min-height: 100%; background: #f5f5f5; display: flex; flex-direction: column; }
+.form-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; display: flex; flex-direction: column; z-index: 10; }
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; flex-shrink: 0; .nav-title { font-size: 15px; font-weight: 600; } .nav-spacer { width: 20px; } .back-btn { cursor: pointer; display: flex; align-items: center; } }
 .form-body { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 80px; }
 .section { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
@@ -106,5 +106,5 @@ async function handleSubmit(){
 .exp-row { margin-bottom: 8px; &.two-col { display: flex; gap: 10px; .exp-field { flex: 1; } } }
 .exp-field { label { display: block; font-size: 11px; color: #999; margin-bottom: 3px; } input, select { width: 100%; height: 34px; border: 1px solid #eee; border-radius: 6px; padding: 0 10px; font-size: 12px; outline: none; background: #fff; &:focus { border-color: #e74c3c; } } }
 .empty-hint { text-align: center; color: #ccc; font-size: 12px; padding: 16px 0; }
-.bottom-actions { position: sticky; bottom: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
+.bottom-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
 </style>

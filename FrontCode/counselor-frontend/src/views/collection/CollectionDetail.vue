@@ -1,7 +1,7 @@
 <template>
   <div class="detail-page">
     <div class="top-nav">
-      <div class="back-btn" @click="goBack">
+      <div class="back-btn" @click="$router.push('/collection/batch')">
         <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg>
       </div>
       <span class="nav-title">信息采集批次</span>
@@ -50,12 +50,12 @@
       <div class="bottom-action"><button class="revoke-btn" @click="handleRevoke">撤销提醒</button></div>
     </div>
 
-    <div v-else class="no-data">暂无提交数据，<a @click="goBack">返回列表</a></div>
+    <div v-else class="no-data">暂无提交数据，<a @click="$router.push('/collection/batch')">返回列表</a></div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -63,17 +63,14 @@ const router = useRouter()
 const route = useRoute()
 const data = ref(null)
 
-const base = computed(() => route.path.startsWith('/college') ? '/college' : '/collection')
-
-function goBack() { router.push(base.value + '/batch') }
-
 onMounted(() => {
   const batchId = route.params.batchId
   try {
     const raw = localStorage.getItem('batch_data_' + batchId)
     if (raw) { data.value = JSON.parse(raw); return }
   } catch (e) {}
-  setTimeout(() => router.push(base.value + '/batch'), 1500)
+  // 无数据，延迟后自动返回
+  setTimeout(() => router.push('/collection/batch'), 1500)
 })
 
 async function handleRevoke() {
@@ -87,14 +84,13 @@ async function handleRevoke() {
     localStorage.setItem('batch_status', JSON.stringify(statusMap))
     localStorage.removeItem('batch_data_' + batchId)
   } catch (e) {}
-  try{const raw=localStorage.getItem('college_applications');if(raw){const apps=JSON.parse(raw).filter(a=>a.updateType!=='采集填报'||String(a.batchId)!==batchId);localStorage.setItem('college_applications',JSON.stringify(apps))}}catch(e){}
   ElMessage.success('已撤销审核，可重新填写')
-  router.push(base.value + '/batch')
+  router.push('/collection/batch')
 }
 </script>
 
 <style scoped lang="scss">
-.detail-page { min-height: 100%; background: #f5f5f5; display: flex; flex-direction: column; }
+.detail-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; display: flex; flex-direction: column; z-index: 10; }
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; flex-shrink: 0; .nav-title { font-size: 15px; font-weight: 600; } .nav-spacer { width: 20px; } .back-btn { cursor: pointer; display: flex; align-items: center; } }
 .detail-body { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 80px; }
 .section { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
@@ -112,7 +108,7 @@ async function handleRevoke() {
 .exp-field { label { display: block; font-size: 11px; color: #999; margin-bottom: 3px; } .readonly-value { display: block; font-size: 12px; color: #666; padding: 6px 0; } }
 .empty-hint { text-align: center; color: #ccc; font-size: 12px; padding: 16px 0; }
 .info-row { font-size: 12px; .label { color: #999; } }
-.bottom-action { position: sticky; bottom: 0; padding: 10px 14px; background: #fff; border-top: 1px solid #eee; }
+.bottom-action { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px; background: #fff; border-top: 1px solid #eee; }
 .revoke-btn { width: 100%; height: 42px; border: 1.5px solid #e74c3c; border-radius: 8px; background: #fff; color: #e74c3c; font-size: 14px; font-weight: 500; cursor: pointer; }
 .no-data { display: flex; align-items: center; justify-content: center; height: 200px; color: #999; font-size: 14px; a { color: #e74c3c; cursor: pointer; margin-left: 4px; } }
 </style>

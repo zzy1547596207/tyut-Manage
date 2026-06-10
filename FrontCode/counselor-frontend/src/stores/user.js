@@ -23,14 +23,6 @@ export const useUserStore = defineStore('user', () => {
     return data
   }
 
-  function switchRole(newRole) {
-    role.value = newRole
-    localStorage.setItem('role', newRole)
-    const names = { COUNSELOR: '发展辅导员', DEPARTMENT: '发展学院', ADMIN: '发展管理员' }
-    nickname.value = names[newRole] || newRole
-    localStorage.setItem('nickname', nickname.value)
-  }
-
   function logout() {
     token.value = 'test-mode'
     username.value = 'demo'
@@ -40,5 +32,5 @@ export const useUserStore = defineStore('user', () => {
     router.push('/login')
   }
 
-  return { token, username, nickname, role, login, switchRole, logout }
+  return { token, username, nickname, role, login, logout }
 })

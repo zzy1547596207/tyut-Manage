@@ -2,8 +2,8 @@
   <el-container class="layout">
     <el-aside :width="isCollapse ? '64px' : '220px'" class="aside">
       <div class="logo">
-        <span v-if="!isCollapse">杈呭鍛樼鐞嗙郴缁?/span>
-        <span v-else>杈呯</span>
+        <span v-if="!isCollapse">辅导员管理系统</span>
+        <span v-else>辅管</span>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -15,53 +15,58 @@
       >
         <el-menu-item index="/dashboard">
           <el-icon><HomeFilled /></el-icon>
-          <span>棣栭〉</span>
+          <span>首页</span>
         </el-menu-item>
 
         <template v-if="role === 'COUNSELOR'">
           <el-menu-item index="/counselor/my">
             <el-icon><User /></el-icon>
-            <span>鎴戠殑淇℃伅</span>
+            <span>我的信息</span>
           </el-menu-item>
           <el-menu-item index="/application/my">
             <el-icon><Document /></el-icon>
-            <span>鎴戠殑鐢宠</span>
+            <span>我的申请</span>
           </el-menu-item>
         </template>
 
         <template v-if="role === 'DEPARTMENT'">
           <el-menu-item index="/counselor/list">
             <el-icon><List /></el-icon>
-            <span>杈呭鍛樺垪琛?/span>
+            <span>辅导员列表</span>
           </el-menu-item>
           <el-menu-item index="/application/pending">
             <el-icon><Checked /></el-icon>
-            <span>寰呭鏍哥敵璇?/span>
+            <span>待审核申请</span>
           </el-menu-item>
         </template>
 
         <template v-if="role === 'ADMIN'">
           <el-menu-item index="/counselor/list">
             <el-icon><List /></el-icon>
-            <span>杈呭鍛樼鐞?/span>
+            <span>辅导员管理</span>
           </el-menu-item>
           <el-menu-item index="/department/manage">
             <el-icon><OfficeBuilding /></el-icon>
-            <span>闄㈢郴绠＄悊</span>
+            <span>院系管理</span>
           </el-menu-item>
           <el-menu-item index="/application/pending">
             <el-icon><Checked /></el-icon>
-            <span>寰呭鏍哥敵璇?/span>
+            <span>待审核申请</span>
           </el-menu-item>
           <el-menu-item index="/application/approve">
             <el-icon><CircleCheck /></el-icon>
-            <span>寰呭鎵圭敵璇?/span>
+            <span>待审批申请</span>
           </el-menu-item>
           <el-menu-item index="/user/manage">
             <el-icon><Setting /></el-icon>
-            <span>鐢ㄦ埛绠＄悊</span>
+            <span>用户管理</span>
           </el-menu-item>
         </template>
+
+        <el-menu-item index="/collection/batch">
+          <el-icon><Collection /></el-icon>
+          <span>信息采集</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -75,7 +80,7 @@
         <div class="header-right">
           <el-tag :type="roleTagType" size="small">{{ roleName }}</el-tag>
           <span class="username">{{ nickname }}</span>
-          <el-button text @click="handleLogout">閫€鍑?/el-button>
+          <el-button text @click="handleLogout">退出</el-button>
         </div>
       </el-header>
 
@@ -100,7 +105,7 @@ const role = computed(() => userStore.role)
 const nickname = computed(() => userStore.nickname)
 
 const roleName = computed(() => {
-  const map = { COUNSELOR: '鍙戝睍杈呭鍛?, DEPARTMENT: '鍙戝睍瀛﹂櫌', ADMIN: '鍙戝睍绠＄悊鍛? }
+  const map = { COUNSELOR: '发展辅导员', DEPARTMENT: '发展学院', ADMIN: '发展管理员' }
   return map[role.value] || role.value
 })
 const roleTagType = computed(() => {

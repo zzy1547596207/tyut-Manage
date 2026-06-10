@@ -10,6 +10,7 @@
     <div class="update-bar">更新时间：{{ updateTime }}</div>
 
     <div class="edit-body">
+      <!-- 证件照 -->
       <div class="section"><div class="section-title">证件照片</div><div class="section-sub">仅限1张，单张≤10M</div>
         <div class="id-photo-upload" @click="uploadIdPhoto">
           <template v-if="form.idPhoto"><img :src="form.idPhoto" class="photo-preview" /><div class="photo-mask" @click.stop="form.idPhoto = ''">×</div></template>
@@ -17,6 +18,7 @@
         </div>
       </div>
 
+      <!-- 生活照 -->
       <div class="section"><div class="section-title">生活照片</div><div class="section-sub">最多5张，单张≤10M</div>
         <div class="life-photo-grid">
           <div v-for="(_, i) in 5" :key="i" class="life-photo-slot" :class="{ filled: form.lifePhotos && form.lifePhotos[i] }" @click="!form.lifePhotos[i] ? uploadLifePhoto(i) : null">
@@ -26,6 +28,7 @@
         </div>
       </div>
 
+      <!-- 基本信息 -->
       <div class="section"><div class="section-title">基本信息</div>
         <div class="field">
           <select v-model="form.education" class="select-input">
@@ -38,6 +41,7 @@
         </div>
       </div>
 
+      <!-- 学工信息 -->
       <div class="section"><div class="section-title">学工信息</div>
         <div class="field">
           <select v-model="form.campus" class="select-input">
@@ -52,6 +56,7 @@
         <div class="field"><input v-model="form.office" placeholder="请输入办公地点" /></div>
       </div>
 
+      <!-- 工作经历 -->
       <div class="section">
         <div class="section-header"><span class="section-title">工作经历</span><span class="add-btn" @click="goAddWork">+ 新增</span></div>
         <div v-if="form.workList.length === 0" class="empty-hint">暂无工作经历，点击右上角新增</div>
@@ -65,6 +70,7 @@
         </div>
       </div>
 
+      <!-- 学习经历 -->
       <div class="section">
         <div class="section-header"><span class="section-title">学习经历</span><span class="add-btn" @click="goAddStudy">+ 新增</span></div>
         <div v-for="(item, i) in form.studyList" :key="i" class="experience-card">
@@ -76,93 +82,69 @@
         </div>
       </div>
 
-      <div class="bottom-actions">
-        <button class="cancel-btn" @click="handleCancel">取消</button>
-        <button class="submit-btn" @click="handleSubmit">提交审核</button>
-      </div>
+      <div class="bottom-actions"><button class="cancel-btn" @click="handleCancel">取消</button><button class="submit-btn" @click="handleSubmit">提交审核</button></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-const router = useRouter(); const route = useRoute(); const base = computed(() => route.path.startsWith('/college') ? '/college' : '/collection')
+const router = useRouter()
+const route = useRoute()
+const updateTime = ref('')
 
-const updateTime = ref(new Date().toLocaleString())
-const form = reactive({ idPhoto: '', lifePhotos: [], education: '', campus: '', office: '', workList: [], studyList: [] })
+const form = reactive({ idPhoto:'', lifePhotos:[], name:'', education:'', campus:'', office:'', workList:[], studyList:[] })
 
-onMounted(() => {
+function loadData() {
   try {
     const raw = localStorage.getItem('profile_data')
     if (raw) {
-      const p = JSON.parse(raw)
-      form.idPhoto = p.idPhoto || ''
-      form.lifePhotos = p.lifePhotos || []
-      form.education = p.education || ''
-      form.campus = p.campus || ''
-      form.office = p.office || ''
-      form.workList = p.workList || []
-      form.studyList = p.studyList || []
-      if (p.updateTime) updateTime.value = p.updateTime
+      const saved = JSON.parse(raw)
+      form.idPhoto = saved.idPhoto || ''; form.lifePhotos = saved.lifePhotos || []
+      form.name = saved.name || ''; form.education = saved.education || ''
+      form.campus = saved.campus || ''; form.office = saved.office || ''
+      form.workList = saved.workList || []; form.studyList = saved.studyList || []
+      updateTime.value = saved.updateTime || ''
+      return
     }
-  } catch (e) {}
-  // 如果学习经历为空，预填默认数据
-  if (form.studyList.length === 0) {
-    form.studyList = [
-      { degreeType: '硕士', school: '北京大学', major: '教育学', entryDate: '2020-09-01', gradDate: '2023-07-01' },
-      { degreeType: '本科', school: '武汉大学', major: '心理学', entryDate: '2016-09-01', gradDate: '2020-07-01' }
-    ]
-  }
-})
+  } catch(e){}
+  try {
+    const raw = localStorage.getItem('batch_data_1')
+    if(raw){ const saved=JSON.parse(raw); form.idPhoto=saved.idPhoto||''; form.lifePhotos=saved.lifePhotos||[]; form.education=saved.education||''; form.workList=saved.workList||[]; form.studyList=saved.studyList||[] }
+  } catch(e){}
+}
 
-function goAddWork() { router.push(base.value + '/work/add') }
-function goAddStudy() { router.push(base.value + '/study/add') }
+watch(() => route.path, () => { loadData() })
+onMounted(loadData)
 
-function uploadIdPhoto() { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = e => { const f = e.target.files[0]; if (f && f.size > 10 * 1024 * 1024) { ElMessage.warning('图片大小不能超过10M'); return }; if (f) { const r = new FileReader(); r.onload = ev => form.idPhoto = ev.target.result; r.readAsDataURL(f) } }; i.click() }
-function uploadLifePhoto(idx) { const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.onchange = e => { const f = e.target.files[0]; if (f && f.size > 10 * 1024 * 1024) { ElMessage.warning('图片大小不能超过10M'); return }; if (f) { const r = new FileReader(); r.onload = ev => form.lifePhotos[idx] = ev.target.result; r.readAsDataURL(f) } }; i.click() }
-
-function handleCancel() { router.push(base.value + '/profile') }
+function uploadIdPhoto() {
+  const input = document.createElement('input'); input.type='file'; input.accept='image/*'
+  input.onchange=e=>{const f=e.target.files[0];if(f&&f.size>10*1024*1024){ElMessage.warning('图片大小不能超过10M');return};if(f){const r=new FileReader();r.onload=ev=>form.idPhoto=ev.target.result;r.readAsDataURL(f)}};input.click()
+}
+function uploadLifePhoto(index) {
+  const input = document.createElement('input'); input.type='file'; input.accept='image/*'
+  input.onchange=e=>{const f=e.target.files[0];if(f&&f.size>10*1024*1024){ElMessage.warning('图片大小不能超过10M');return};if(f){const r=new FileReader();r.onload=ev=>form.lifePhotos[index]=ev.target.result;r.readAsDataURL(f)}};input.click()
+}
+function goAddWork() { router.push('/collection/work/add') }
+function goAddStudy() { router.push('/collection/study/add') }
+function handleCancel() { router.push('/collection/profile') }
 
 async function handleSubmit() {
-  if (!form.education) { ElMessage.warning('请选择最高学历'); return }
-  if (!form.idPhoto) { ElMessage.warning('请上传证件照片'); return }
-
-  // 保存到 localStorage
-  const saveData = {
-    ...form, lifePhotos: [...form.lifePhotos], workList: JSON.parse(JSON.stringify(form.workList)),
-    studyList: JSON.parse(JSON.stringify(form.studyList)), updateTime: new Date().toLocaleString(), status: 'reviewing'
-  }
-  localStorage.setItem('profile_data', JSON.stringify(saveData))
-
-  // 同步 batch_data_1
-  try {
-    const br = localStorage.getItem('batch_data_1')
-    if (br) {
-      const b = JSON.parse(br)
-      b.education = form.education; b.workList = JSON.parse(JSON.stringify(form.workList))
-      b.studyList = JSON.parse(JSON.stringify(form.studyList)); b.idPhoto = form.idPhoto
-      b.lifePhotos = [...form.lifePhotos]; localStorage.setItem('batch_data_1', JSON.stringify(b))
-    }
-  } catch (e) {}
-
-  // 写入学院审核列表
-  try {
-    const raw = localStorage.getItem('college_applications')
-    const apps = raw ? JSON.parse(raw) : []
-    apps.unshift({ id: Date.now(), counselorName: '辅导员', employeeNo: '11004', department: form.campus || '未填写', type: '专职辅导员', position: '辅导员', applyTime: new Date().toLocaleString(), updateType: '自主变更', selected: false, expanded: false, changes: [{ label: '最高学历', old: '原值', new: form.education }] })
-    localStorage.setItem('college_applications', JSON.stringify(apps))
-  } catch (e) {}
-
-  await ElMessageBox.alert('档案修改已提交审核，请等待学院管理员审核。', '提交成功', { type: 'success' })
-  router.push(base.value + '/profile')
+  if(!form.education){ElMessage.warning('请选择最高学历');return}
+  if(!form.idPhoto){ElMessage.warning('请上传证件照片');return}
+  const saveData={...form,lifePhotos:[...form.lifePhotos],workList:JSON.parse(JSON.stringify(form.workList)),studyList:JSON.parse(JSON.stringify(form.studyList)),updateTime:new Date().toLocaleString(),status:'reviewing'}
+  localStorage.setItem('profile_data',JSON.stringify(saveData))
+  try{const br=localStorage.getItem('batch_data_1');if(br){const b=JSON.parse(br);b.education=form.education;b.workList=JSON.parse(JSON.stringify(form.workList));b.studyList=JSON.parse(JSON.stringify(form.studyList));b.idPhoto=form.idPhoto;b.lifePhotos=[...form.lifePhotos];localStorage.setItem('batch_data_1',JSON.stringify(b))}}catch(e){}
+  await ElMessageBox.alert('档案修改已提交审核，请等待学院管理员审核。','提交成功',{type:'success'})
+  router.push('/collection/profile')
 }
 </script>
 
 <style scoped lang="scss">
-.edit-page { min-height: 100%; background: #f5f5f5; display: flex; flex-direction: column; }
+.edit-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f5f5; display: flex; flex-direction: column; z-index: 10; }
 .top-nav { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; flex-shrink: 0; .nav-title { font-size: 15px; font-weight: 600; } .nav-spacer { width: 20px; } .back-btn { cursor: pointer; display: flex; align-items: center; } }
 .update-bar { background: #fff; padding: 6px 14px; font-size: 11px; color: #999; border-top: 1px solid #f5f5f5; }
 .edit-body { flex: 1; overflow-y: auto; padding: 10px 14px; padding-bottom: 80px; }
@@ -181,5 +163,5 @@ async function handleSubmit() {
 .exp-row { margin-bottom: 8px; &.two-col { display: flex; gap: 10px; .exp-field { flex: 1; } } }
 .exp-field { label { display: block; font-size: 11px; color: #999; margin-bottom: 3px; } input, select { width: 100%; height: 34px; border: 1px solid #eee; border-radius: 6px; padding: 0 10px; font-size: 12px; outline: none; background: #fff; &:focus { border-color: #e74c3c; } } }
 .empty-hint { text-align: center; color: #ccc; font-size: 12px; padding: 16px 0; }
-.bottom-actions { position: sticky; bottom: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
+.bottom-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 14px; background: #fff; display: flex; gap: 12px; border-top: 1px solid #eee; .cancel-btn, .submit-btn { flex: 1; height: 42px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; } .cancel-btn { background: #fff; border: 1px solid #ddd; color: #333; } .submit-btn { background: #e74c3c; border: none; color: #fff; } }
 </style>

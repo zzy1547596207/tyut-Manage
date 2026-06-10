@@ -5,10 +5,6 @@
       <button class="search-btn" @click="handleSearch">搜索</button>
     </div>
 
-    <div v-if="isCollege" class="publish-bar">
-      <button class="publish-btn" @click="router.push('/college/batch/publish')">+ 发布采集批次</button>
-    </div>
-
     <div v-if="filteredList.length > 0" class="batch-list">
       <div v-for="item in filteredList" :key="item.id" class="batch-card" @click="handleCardClick(item)">
         <div class="card-header">
@@ -25,7 +21,8 @@
         </div>
         <div class="card-footer">
           <template v-if="item.status === 'reviewing'">
-            <span class="status-tag">审核中</span><span class="click-hint">&gt;</span>
+            <span class="status-tag">审核中</span>
+            <span class="click-hint">&gt;</span>
           </template>
           <template v-else-if="item.status === 'approved'">
             <span class="status-tag approved">审核通过</span>
@@ -62,22 +59,17 @@
 
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute()
-const isCollege = computed(() => route.path.startsWith('/college'))
 const keyword = ref('')
 
-function loadStatus() { try { return JSON.parse(localStorage.getItem('batch_status') || '{}') } catch { return {} } }
+function loadStatus() {
+  try { return JSON.parse(localStorage.getItem('batch_status') || '{}') } catch { return {} }
+}
 const batchStatus = ref(loadStatus())
-
-function loadBatchList() { try { const raw = localStorage.getItem('batch_list'); if (raw) return JSON.parse(raw) } catch (e) {} return [{ id: 1, name: '2024 年辅导员信息采集', startTime: '2024-09-01', endTime: '2024-09-30', duration: '30 天' }] }
-const batchList = ref(loadBatchList())
-function refreshBatches() { batchList.value = loadBatchList() }
-
-onMounted(() => { batchStatus.value = loadStatus(); if (!localStorage.getItem('batch_list')) { localStorage.setItem('batch_list', JSON.stringify(loadBatchList())) }; ensureDemoData() })
-onActivated(() => { batchStatus.value = loadStatus(); refreshBatches(); ensureDemoData() })
+onMounted(() => { batchStatus.value = loadStatus(); ensureDemoData() })
+onActivated(() => { batchStatus.value = loadStatus(); ensureDemoData() })
 
 function ensureDemoData() {
   const s = batchStatus.value
@@ -85,52 +77,50 @@ function ensureDemoData() {
     localStorage.setItem('batch_data_1', JSON.stringify({
       idPhoto: '', lifePhotos: [], education: '硕士',
       workList: [{ company:'XX大学',startDate:'2023-09-01',endDate:'',category:'专职辅导员',studentType:'本科生',studentCount:'200',grade:'2023级' }],
-      studyList: [{ degreeType:'硕士',school:'北京大学',major:'教育学',entryDate:'2020-09-01',gradDate:'2023-07-01' },{ degreeType:'本科',school:'武汉大学',major:'心理学',entryDate:'2016-09-01',gradDate:'2020-07-01' }],
+      studyList: [
+        { degreeType:'硕士',school:'北京大学',major:'教育学',entryDate:'2020-09-01',gradDate:'2023-07-01' },
+        { degreeType:'本科',school:'武汉大学',major:'心理学',entryDate:'2016-09-01',gradDate:'2020-07-01' }
+      ],
       submitTime: '2024-09-01 10:30:00'
     }))
   }
 }
 
+const batchList = ref([
+  { id: 1, name: '2024 年辅导员信息采集', startTime: '2024-09-01', endTime: '2024-09-30', duration: '30 天' }
+])
+
 const filteredList = computed(() => {
   const statusMap = batchStatus.value
   let result = batchList.value.map(item => ({ ...item, status: statusMap[item.id] || null }))
-  if (keyword.value.trim()) result = result.filter(item => item.name.includes(keyword.value.trim()))
+  if (keyword.value.trim()) { result = result.filter(item => item.name.includes(keyword.value.trim())) }
   return result
 })
 
 function handleSearch() {}
-function handleStart(item) { router.push((isCollege.value ? '/college' : '/collection') + '/form/' + item.id) }
-function handleCardClick(item) { if (item.status === 'reviewing') router.push((isCollege.value ? '/college' : '/collection') + '/detail/' + item.id) }
+function handleStart(item) { router.push('/collection/form/' + item.id) }
+function handleCardClick(item) {
+  if (item.status === 'reviewing') { router.push('/collection/detail/' + item.id) }
+}
 </script>
 
 <style scoped lang="scss">
-.batch-page { padding: 12px; }
+.batch-page { padding: 12px; height: 100%; overflow-y: auto; }
 .search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
-.search-input { flex: 1; height: 36px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none; background: #fff; }
-.search-input:focus { border-color: #e74c3c; }
+.search-input { flex: 1; height: 36px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none; background: #fff; &:focus { border-color: #e74c3c; } }
 .search-btn { width: 56px; height: 36px; border: none; border-radius: 6px; background: #e74c3c; color: #fff; font-size: 13px; cursor: pointer; }
-.publish-bar { margin-bottom: 14px; }
-.publish-btn { width: 100%; height: 40px; border: 1.5px dashed #e74c3c; border-radius: 8px; background: #fff; color: #e74c3c; font-size: 14px; font-weight: 500; cursor: pointer; }
 .batch-list { display: flex; flex-direction: column; gap: 12px; }
 .batch-card { background: #fff; border-radius: 12px; padding: 14px; cursor: pointer; }
-.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.card-header .doc-icon { width: 20px; height: 20px; flex-shrink: 0; }
-.card-header .batch-name { font-size: 15px; font-weight: 600; color: #333; }
+.card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; .doc-icon { width: 20px; height: 20px; flex-shrink: 0; } .batch-name { font-size: 15px; font-weight: 600; color: #333; } }
 .card-info { margin-bottom: 14px; }
-.info-row { font-size: 12px; color: #666; margin-bottom: 4px; }
-.info-row .label { color: #999; }
-.info-row .value { color: #333; }
+.info-row { font-size: 12px; color: #666; margin-bottom: 4px; .label { color: #999; } .value { color: #333; } }
 .card-footer { display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
 .fill-btn { padding: 6px 20px; border: 1.5px solid #e74c3c; border-radius: 6px; background: #fff; color: #e74c3c; font-size: 13px; font-weight: 500; cursor: pointer; }
-.status-tag { font-size: 13px; font-weight: 600; color: #e6a23c; }
-.status-tag.approved { color: #67c23a; }
-.status-tag.rejected { color: #f56c6c; }
+.status-tag { font-size: 13px; font-weight: 600; color: #e6a23c; &.approved { color: #67c23a; } &.rejected { color: #f56c6c; } }
 .click-hint { color: #ccc; font-size: 14px; }
-.rejected-text { font-size: 13px; color: #f56c6c; }
-.rejected-text .resubmit-link { color: #e74c3c; cursor: pointer; font-weight: 600; text-decoration: none; }
+.rejected-text { font-size: 13px; color: #f56c6c; .resubmit-link { color: #e74c3c; cursor: pointer; font-weight: 600; text-decoration: none; } }
 .empty-state { text-align: center; padding-top: 40px; }
-.illustration { width: 180px; margin: 0 auto 12px; }
-.illustration svg { width: 100%; height: auto; }
+.illustration { width: 180px; margin: 0 auto 12px; svg { width: 100%; height: auto; } }
 .empty-text { font-size: 15px; color: #333; margin-bottom: 4px; font-weight: 500; }
 .empty-sub { font-size: 12px; color: #999; }
 </style>
