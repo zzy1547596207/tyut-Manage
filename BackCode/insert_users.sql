@@ -1,0 +1,22 @@
+DELETE FROM sys_user WHERE username NOT IN ('counselor', 'college', 'admin');
+INSERT INTO sys_user (username, password, nickname, role, employee_no, department, phone) VALUES
+('counselor01', '123456', '张三', 'COUNSELOR', '11001', 'A学院', '13800001001'),
+('counselor02', '123456', '李四', 'COUNSELOR', '11002', 'A学院', '13800001002'),
+('counselor03', '123456', '王五', 'COUNSELOR', '11003', 'A学院', '13800001003'),
+('counselor04', '123456', '赵六', 'COUNSELOR', '11005', 'A学院', '13800001005'),
+('counselor05', '123456', '孙七', 'COUNSELOR', '11006', 'B学院', '13800001006'),
+('counselor06', '123456', '周八', 'COUNSELOR', '11007', 'B学院', '13800001007'),
+('counselor07', '123456', '吴九', 'COUNSELOR', '11008', 'B学院', '13800001008'),
+('counselor08', '123456', '郑十', 'COUNSELOR', '11009', 'B学院', '13800001009'),
+('counselor09', '123456', '刘明', 'COUNSELOR', '11010', 'C学院', '13800001010'),
+('counselor10', '123456', '陈静', 'COUNSELOR', '11011', 'C学院', '13800001011'),
+('counselor11', '123456', '杨帆', 'COUNSELOR', '11012', 'C学院', '13800001012'),
+('counselor12', '123456', '黄丽', 'COUNSELOR', '11013', 'D学院', '13800001013'),
+('counselor13', '123456', '林强', 'COUNSELOR', '11014', 'D学院', '13800001014'),
+('counselor14', '123456', '何伟', 'COUNSELOR', '11015', 'D学院', '13800001015'),
+('counselor15', '123456', '马超', 'COUNSELOR', '11016', 'E学院', '13800001016'),
+('collegeA', '123456', 'A学院管理员', 'DEPARTMENT', '12001', 'A学院', '13900002001'),
+('collegeB', '123456', 'B学院管理员', 'DEPARTMENT', '12002', 'B学院', '13900002002'),
+('collegeC', '123456', 'C学院管理员', 'DEPARTMENT', '12003', 'C学院', '13900002003'),
+('admin01', '123456', '校级管理员一', 'ADMIN', '13001', '校级', '13700003001'),
+('admin02', '123456', '校级管理员二', 'ADMIN', '13002', '校级', '13700003002');
