@@ -4,10 +4,10 @@
       <h1 class="title">辅导员管理系统</h1>
       <p class="subtitle">基本信息采集与管理</p>
 
-      <div class="form-group">
+      <div v-if="roleHint" class="role-hint">{{ roleHint }}</div><div class="form-group">
         <input v-model="form.username" class="input" placeholder="请输入用户名" @keyup.enter="focusPassword" />
       </div>
-      <div class="form-group">
+      <div v-if="roleHint" class="role-hint">{{ roleHint }}</div><div class="form-group">
         <input ref="pwdRef" v-model="form.password" type="password" class="input" placeholder="请输入密码" @keyup.enter="handleLogin" />
       </div>
 
@@ -27,15 +27,15 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { ElMessage } from 'element-plus'
 
-const router = useRouter()
+const router = useRouter(); const route = useRoute()
 const userStore = useUserStore()
 const loading = ref(false)
-const pwdRef = ref(null)
+const pwdRef = ref(null); const roleHint = ref(''); onMounted(() => { const r = route.query.role; if (r === 'COUNSELOR') roleHint.value = '请输入辅导员账号'; else if (r === 'DEPARTMENT') roleHint.value = '请输入学院管理员账号'; else if (r === 'ADMIN') roleHint.value = '请输入校级管理员账号' })
 
 const form = reactive({ username: '', password: '' })
 
@@ -98,5 +98,5 @@ async function handleLogin() {
 .tag-red { background: #fef0f0; color: #e74c3c; border: 1px solid #f5c6cb; }
 .tag-blue { background: #f0f4fe; color: #409eff; border: 1px solid #b3d8ff; }
 .tag-orange { background: #fef6f0; color: #e6a23c; border: 1px solid #f5dab1; }
-.help-text { font-size: 11px; color: #bbb; margin-top: 16px; }
+.role-hint { text-align: center; font-size: 12px; color: #e74c3c; margin-bottom: 12px; padding: 6px; background: #fef0f0; border-radius: 6px; } .help-text { font-size: 11px; color: #bbb; margin-top: 16px; }
 </style>
