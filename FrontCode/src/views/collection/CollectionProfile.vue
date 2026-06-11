@@ -1,6 +1,5 @@
 <template>
   <div class="profile-page">
-    <!-- 审核中状态 -->
     <div v-if="profileStatus === 'reviewing'" class="status-page">
       <div class="illustration">
         <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +24,6 @@
       <a class="action-link" @click="handleRevoke">撤销申请</a>
     </div>
 
-    <!-- 审核不通过状态 -->
     <div v-else-if="profileStatus === 'rejected'" class="status-page">
       <div class="illustration">
         <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +46,6 @@
       <a class="action-link" @click="handleResubmit">重新提交</a>
     </div>
 
-    <!-- 正常状态：完整档案 -->
     <template v-else>
       <div class="top-bar"><span class="update-time">更新时间：{{ updateTime }}</span><button class="edit-btn" @click="handleEdit">编辑信息</button></div>
       <div class="profile-body">
@@ -64,22 +61,23 @@
         </div>
         <div class="section"><div class="section-title">基本信息</div>
           <div class="info-list">
-            <div class="info-item"><span class="label">姓名</span><span class="value">{{ data.name || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">性别</span><span class="value">{{ data.gender || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">出生年月</span><span class="value">{{ data.birth || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">政治面貌</span><span class="value">{{ data.politicalStatus || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">部门</span><span class="value">{{ data.department || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">辅导员类型</span><span class="value">{{ data.type || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">职务</span><span class="value">{{ data.position || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">最高学历</span><span class="value">{{ data.education || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">最高学位</span><span class="value">{{ data.degree || '未填写' }}</span></div>
+            <div class="info-item"><span class="label">姓名</span><span class="value">{{ data.name || '' }}</span></div>
+            <div class="info-item"><span class="label">工号</span><span class="value">{{ data.employeeNo || '' }}</span></div>
+            <div class="info-item"><span class="label">性别</span><span class="value">{{ data.gender || '' }}</span></div>
+            <div class="info-item"><span class="label">出生年月</span><span class="value">{{ data.birth || '' }}</span></div>
+            <div class="info-item"><span class="label">政治面貌</span><span class="value">{{ data.politicalStatus || '' }}</span></div>
+            <div class="info-item"><span class="label">所在单位</span><span class="value">{{ data.department || '' }}</span></div>
+            <div class="info-item"><span class="label">辅导员类型</span><span class="value">{{ data.type || '' }}</span></div>
+            <div class="info-item"><span class="label">职务</span><span class="value">{{ data.position || '' }}</span></div>
+            <div class="info-item"><span class="label">最高学历</span><span class="value">{{ data.education || '' }}</span></div>
+            <div class="info-item"><span class="label">最高学位</span><span class="value">{{ data.degree || '' }}</span></div>
           </div>
         </div>
         <div class="section"><div class="section-title">学工信息</div>
           <div class="info-list">
-            <div class="info-item"><span class="label">办公地点</span><span class="value">{{ data.office || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">校区</span><span class="value">{{ data.campus || '未填写' }}</span></div>
-            <div class="info-item"><span class="label">电话</span><span class="value">{{ data.phone || '未填写' }}</span></div>
+            <div class="info-item"><span class="label">校区</span><span class="value">{{ data.campus || '' }}</span></div>
+            <div class="info-item"><span class="label">办公地点</span><span class="value">{{ data.office || '' }}</span></div>
+            <div class="info-item"><span class="label">手机号</span><span class="value">{{ data.phone || '' }}</span></div>
           </div>
         </div>
         <div class="section"><div class="section-title">工作经历</div>
@@ -87,8 +85,10 @@
           <div v-for="(item,i) in workList" :key="i" class="exp-card">
             <div class="exp-title">工作经历 {{i+1}}</div>
             <div class="exp-row"><span class="el">单位：</span><span class="ev">{{item.company}}</span></div>
-            <div class="exp-row two-col"><span class="el">开始：</span><span class="ev">{{item.startDate}}</span><span class="el">结束：</span><span class="ev">{{item.endDate||'至今'}}</span></div>
+            <div class="exp-row"><span class="el">起止：</span><span class="ev">{{item.startDate}} ~ {{item.endDate}}</span></div>
             <div class="exp-row"><span class="el">类别：</span><span class="ev">{{item.category}}</span></div>
+            <div class="exp-row two-col"><span class="el">学生类别：</span><span class="ev">{{item.studentType}}</span><span class="el">总数：</span><span class="ev">{{item.studentCount}}</span></div>
+            <div class="exp-row"><span class="el">年级：</span><span class="ev">{{item.grade}}</span></div>
           </div>
         </div>
         <div class="section"><div class="section-title">学习经历</div>

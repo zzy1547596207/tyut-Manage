@@ -11,7 +11,7 @@
         <span class="menu-arrow">&gt;</span>
       </div>
 
-      <div class="menu-item" @click="router.push('/college/profile')">
+      <div v-if="!isAdmin" class="menu-item" @click="router.push('/college/profile')">
         <div class="menu-icon" style="background:#f3e5f5">
           <svg viewBox="0 0 24 24" fill="none" stroke="#8E24AA" stroke-width="2" width="22" height="22">
             <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
@@ -31,7 +31,7 @@
         <span class="menu-arrow">&gt;</span>
       </div>
 
-      <div class="menu-item" @click="router.push('/college/approval/history')">
+      <div v-if="!isAdmin" class="menu-item" @click="router.push('/college/approval/history')">
         <div class="menu-icon" style="background:#fff3e0">
           <svg viewBox="0 0 24 24" fill="none" stroke="#F57C00" stroke-width="2" width="22" height="22">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -58,23 +58,16 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useUserStore } from '../../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
 const showRoleSheet = ref(false)
+const isAdmin = computed(() => userStore.role === 'ADMIN')
 function goStats() { if (userStore.role === 'ADMIN') router.push('/college/admin-stats'); else router.push('/college/stats') }
 const currentRole = computed(() => userStore.role)
-const names = { COUNSELOR: '发展辅导员', DEPARTMENT: '发展学院', ADMIN: '发展管理员' }
 
-function doSwitch(role) {
-  userStore.switchRole(role)
-  showRoleSheet.value = false
-  ElMessage.success('已切换为：' + names[role])
-  if (role === 'DEPARTMENT' || role === 'ADMIN') { router.push('/college/review') }
-  else { router.push('/collection/batch') }
-}
+function doSwitch(role) { userStore.switchRole(role); showRoleSheet.value = false }
 </script>
 
 <style scoped lang="scss">

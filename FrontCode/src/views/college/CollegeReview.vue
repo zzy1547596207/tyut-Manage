@@ -12,14 +12,57 @@
           <span class="avatar-circle">&#x1f468;</span>
           <span class="counselor-name">{{ item.userName || '辅导员' }}</span>
           <span class="employee-no">{{ item.employeeNo || '-' }}</span>
-          <span class="phone-icon" @click="ElMessage.info('联系电话功能')">&#x1f4de;</span>
         </div>
         <div class="card-info">
           <div class="info-row"><span class="label">所在单位：</span><span>{{ item.department || '-' }}</span></div>
           <div class="info-row"><span class="label">申请类型：</span><span :class="item.type==='profile_change'?'type-blue':'type-orange'">{{ item.updateType || '-' }}</span></div>
           <div class="info-row"><span class="label">申请时间：</span><span>{{ item.applyTime || '-' }}</span></div>
         </div>
+
+        <div v-if="item.expanded" class="detail-section">
+          <div v-if="item.loading" class="detail-loading">加载中...</div>
+          <template v-else>
+            <div class="detail-title">证件照片</div>
+            <div v-if="item.idPhoto" class="photo-area">
+              <img :src="item.idPhoto" class="id-photo" />
+            </div>
+            <div v-else class="detail-row"><span class="d-value">未上传</span></div>
+
+            <div class="detail-title" style="margin-top:10px">生活照片</div>
+            <div v-if="item.lifePhotos && item.lifePhotos.length > 0" class="life-photo-row">
+              <img v-for="(lp, lpi) in item.lifePhotos" :key="'lp'+lpi" :src="lp" class="life-photo" />
+            </div>
+            <div v-else class="detail-row"><span class="d-value">未上传</span></div>
+
+            <div class="detail-title" style="margin-top:10px">基本信息</div>
+            <div class="detail-row"><span class="d-label">最高学历</span><span class="d-value">{{ getContent(item).education || '-' }}</span></div>
+
+            <template v-if="getWorkList(item).length > 0">
+              <div class="detail-subtitle">工作经历</div>
+              <div v-for="(w, wi) in getWorkList(item)" :key="'w'+wi" class="detail-block">
+                <div class="detail-row"><span class="d-label">单位</span><span class="d-value">{{ w.company || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">起止</span><span class="d-value">{{ w.startDate || '-' }} ~ {{ w.endDate || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">类别</span><span class="d-value">{{ w.category || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">学生类别</span><span class="d-value">{{ w.studentType || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">学生数</span><span class="d-value">{{ w.studentCount || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">年级</span><span class="d-value">{{ w.grade || '-' }}</span></div>
+              </div>
+            </template>
+
+            <template v-if="getStudyList(item).length > 0">
+              <div class="detail-subtitle">学习经历</div>
+              <div v-for="(s, si) in getStudyList(item)" :key="'s'+si" class="detail-block">
+                <div class="detail-row"><span class="d-label">学历</span><span class="d-value">{{ s.degreeType || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">院校</span><span class="d-value">{{ s.school || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">专业</span><span class="d-value">{{ s.major || '-' }}</span></div>
+                <div class="detail-row"><span class="d-label">起止</span><span class="d-value">{{ s.entryDate || '-' }} ~ {{ s.gradDate || '-' }}</span></div>
+              </div>
+            </template>
+          </template>
+        </div>
+
         <div class="card-actions">
+          <button class="btn-detail" @click="toggleDetail(item)">{{ item.expanded ? '收起' : '查看变更内容' }}</button>
           <button class="btn-pass" @click="handleApprove(item)">审核通过</button>
           <button class="btn-reject" @click="handleReject(item)">驳回</button>
         </div>
@@ -36,7 +79,6 @@
       <button class="batch-btn" @click="batchApprove">批量审核</button>
     </div>
 
-    <!-- 驳回弹窗 -->
     <div v-if="rejectDialog.show" class="dialog-overlay" @click.self="rejectDialog.show=false">
       <div class="dialog-box">
         <div class="dialog-title">驳回原因</div>
@@ -71,11 +113,48 @@ const filteredList = computed(() => {
 
 function doSearch() {}
 
+function getContent(item) {
+  const c = item.content
+  if (!c) return {}
+  try { return typeof c === 'string' ? JSON.parse(c) : c } catch { return {} }
+}
+function getWorkList(item) {
+  const c = getContent(item)
+  if (!c || !c.workList) return []
+  try { return typeof c.workList === 'string' ? JSON.parse(c.workList) : c.workList } catch { return [] }
+}
+function getStudyList(item) {
+  const c = getContent(item)
+  if (!c || !c.studyList) return []
+  try { return typeof c.studyList === 'string' ? JSON.parse(c.studyList) : c.studyList } catch { return [] }
+}
+
+async function toggleDetail(item) {
+  if (item.expanded) {
+    item.expanded = false
+    return
+  }
+  item.expanded = true
+  if (item.idPhoto !== undefined) return
+  if (item.type !== 'batch_submit' || !item.batchId) return
+  item.loading = true
+  try {
+    const res = await request.get('/submission/detail', { params: { batchId: item.batchId, userId: item.userId } })
+    if (res.data) {
+      item.idPhoto = res.data.idPhoto || null
+      item.lifePhotos = (() => {
+        try { const arr = JSON.parse(res.data.lifePhotos || '[]'); return Array.isArray(arr) ? arr : [] } catch { return [] }
+      })()
+    }
+  } catch (e) { console.error('加载照片失败', e) }
+  item.loading = false
+}
+
 async function loadApplications() {
   try {
     const res = await request.get('/review/pending')
     if (res.data) {
-      applications.value = res.data.map(a => ({ ...a, selected: false }))
+      applications.value = res.data.map(a => ({ ...a, selected: false, expanded: false }))
     }
   } catch (e) { console.error('加载待审核列表失败', e) }
 }
@@ -83,9 +162,7 @@ async function loadApplications() {
 onMounted(loadApplications)
 onActivated(loadApplications)
 
-function toggleAll() {
-  applications.value.forEach(a => a.selected = selectAll.value)
-}
+function toggleAll() { applications.value.forEach(a => a.selected = selectAll.value) }
 
 function handleReject(item) {
   rejectDialog.item = item
@@ -115,9 +192,7 @@ async function batchApprove() {
   const selected = applications.value.filter(a => a.selected)
   if (selected.length === 0) { ElMessage.warning('请选择需要审核的单据'); return }
   try {
-    for (const item of selected) {
-      await request.post('/review/approve/' + item.id)
-    }
+    for (const item of selected) { await request.post('/review/approve/' + item.id) }
     ElMessage.success('批量审核完成')
     loadApplications()
   } catch (e) { ElMessage.error('批量审核失败: ' + (e.message || '')) }
@@ -138,12 +213,23 @@ async function batchApprove() {
 .avatar-circle { font-size: 18px; }
 .counselor-name { font-size: 14px; font-weight: 600; color: #333; }
 .employee-no { font-size: 12px; color: #999; }
-.phone-icon { margin-left: auto; cursor: pointer; font-size: 16px; }
-.card-info { margin-bottom: 10px; }
+.card-info { margin-bottom: 8px; }
 .info-row { font-size: 12px; color: #666; margin-bottom: 3px; .label { color: #999; } }
 .type-blue { color: #409eff; }
 .type-orange { color: #e6a23c; }
-.card-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.detail-section { background: #fafafa; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.detail-title { font-size: 12px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.detail-loading { text-align: center; color: #999; font-size: 12px; padding: 10px 0; }
+.detail-body { display: flex; flex-direction: column; gap: 4px; }
+.detail-row { display: flex; font-size: 12px; .d-label { color: #999; min-width: 50px; } .d-value { color: #333; } }
+.detail-subtitle { font-size: 12px; font-weight: 600; color: #e74c3c; margin-top: 6px; margin-bottom: 2px; padding-top: 4px; border-top: 1px solid #eee; }
+.detail-block { background: #fff; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px; }
+.photo-area { margin-bottom: 6px; }
+.id-photo { width: 120px; height: 150px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
+.life-photo-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.life-photo { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
+.card-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.btn-detail { padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #333; font-size: 12px; cursor: pointer; }
 .btn-pass { padding: 6px 18px; border: none; border-radius: 6px; background: #e74c3c; color: #fff; font-size: 13px; cursor: pointer; }
 .btn-reject { padding: 6px 18px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #666; font-size: 13px; cursor: pointer; }
 .empty-state { text-align: center; padding-top: 60px; }

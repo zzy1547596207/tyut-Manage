@@ -48,14 +48,10 @@ const router = useRouter()
 const userStore = useUserStore()
 const showRoleSheet = ref(false)
 const currentRole = computed(() => userStore.role)
-const names = { COUNSELOR: '发展辅导员', DEPARTMENT: '发展学院', ADMIN: '发展管理员' }
 
 function doSwitch(role) {
   userStore.switchRole(role)
   showRoleSheet.value = false
-  ElMessage.success('已切换为：' + names[role])
-  if (role === 'DEPARTMENT' || role === 'ADMIN') { router.push('/college/review') }
-  else { router.push('/collection/batch') }
 }
 </script>
 

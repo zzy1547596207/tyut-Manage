@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="edit-page">
     <div class="top-nav">
       <div class="back-btn" @click="handleCancel">
@@ -25,66 +25,106 @@
       </div>
       <div class="section"><div class="section-title">基本信息</div>
         <div class="field"><input v-model="form.name" placeholder="姓名" /></div>
+        <div class="field"><input v-model="form.employeeNo" placeholder="工号" /></div>
         <div class="field"><input v-model="form.gender" placeholder="性别" /></div>
         <div class="field"><input v-model="form.birth" placeholder="出生年月" /></div>
         <div class="field"><input v-model="form.politicalStatus" placeholder="政治面貌" /></div>
         <div class="field"><input v-model="form.department" placeholder="所在单位" /></div>
-        <div class="field"><select v-model="form.type" class="select-input"><option value="">辅导员类型</option><option>专职辅导员</option><option>兼职辅导员</option><option>专任教师</option></select></div>
+        <div class="field">
+          <select v-model="form.type" class="select-input">
+            <option value="">辅导员类型</option>
+            <option value="专职辅导员">专职辅导员</option>
+            <option value="兼职辅导员">兼职辅导员</option>
+            <option value="专任教师">专任教师</option>
+          </select>
+        </div>
         <div class="field"><input v-model="form.position" placeholder="职务" /></div>
-        <div class="field"><select v-model="form.education" class="select-input"><option value="">请选择最高学历</option><option>博士</option><option>硕士</option><option>本科</option><option>大专</option></select></div>
-        <div class="field"><select v-model="form.degree" class="select-input"><option value="">请选择最高学位</option><option>博士</option><option>硕士</option><option>学士</option></select></div>
+        <div class="field">
+          <select v-model="form.education" class="select-input">
+            <option value="">请选择最高学历</option>
+            <option value="博士">博士</option>
+            <option value="硕士">硕士</option>
+            <option value="本科">本科</option>
+            <option value="大专">大专</option>
+          </select>
+        </div>
+        <div class="field">
+          <select v-model="form.degree" class="select-input">
+            <option value="">请选择最高学位</option>
+            <option value="博士">博士</option>
+            <option value="硕士">硕士</option>
+            <option value="学士">学士</option>
+          </select>
+        </div>
       </div>
       <div class="section"><div class="section-title">学工信息</div>
         <div class="field"><input v-model="form.campus" placeholder="校区" /></div>
         <div class="field"><input v-model="form.office" placeholder="办公地点" /></div>
         <div class="field"><input v-model="form.phone" placeholder="手机号" /></div>
       </div>
-      <div class="section"><div class="section-header"><span class="section-title">工作经历</span><span class="add-btn" @click="goAddWork">+ 新增</span></div>
+      <div class="section">
+        <div class="section-header"><span class="section-title">工作经历</span><span class="add-btn" @click="goAddWork">+ 新增</span></div>
         <div v-if="form.workList.length===0" class="empty-hint">暂无工作经历，点击右上角新增</div>
         <div v-for="(item,i) in form.workList" :key="i" class="experience-card">
-          <div class="exp-header"><span>工作经历 {{i+1}}</span><span class="del-btn" @click="form.workList.splice(i,1)">删除</span></div>
+          <div class="exp-header"><span>工作经历 {{i+1}}</span><span class="del-btn" @click="removeWork(i)">删除</span></div>
           <div class="exp-row"><div class="exp-field"><label>任职单位</label><input v-model="item.company" placeholder="请输入" /></div></div>
           <div class="exp-row two-col"><div class="exp-field"><label>开始日期</label><input v-model="item.startDate" type="date" /></div><div class="exp-field"><label>结束日期</label><input v-model="item.endDate" type="date" /></div></div>
           <div class="exp-row"><div class="exp-field"><label>任职类别</label><input v-model="item.category" placeholder="如：专职辅导员" /></div></div>
-          <div class="exp-row two-col"><div class="exp-field"><label>所带学生类别</label><select v-model="item.studentType"><option value="">请选择</option><option>本科生</option><option>硕士生</option><option>博士生</option></select></div><div class="exp-field"><label>所带学生总数</label><input v-model="item.studentCount" type="number" placeholder="请输入" /></div></div>
+          <div class="exp-row two-col"><div class="exp-field"><label>所带学生类别</label><select v-model="item.studentType"><option value="">请选择</option><option value="本科生">本科生</option><option value="硕士生">硕士生</option><option value="博士生">博士生</option></select></div><div class="exp-field"><label>所带学生总数</label><input v-model="item.studentCount" type="number" placeholder="请输入" /></div></div>
           <div class="exp-row"><div class="exp-field"><label>所带学生年级</label><input v-model="item.grade" placeholder="如：2024级" /></div></div>
         </div>
       </div>
-      <div class="section"><div class="section-header"><span class="section-title">学习经历</span><span class="add-btn" @click="goAddStudy">+ 新增</span></div>
+      <div class="section">
+        <div class="section-header"><span class="section-title">学习经历</span><span class="add-btn" @click="goAddStudy">+ 新增</span></div>
         <div v-if="form.studyList.length===0" class="empty-hint">暂无学习经历，点击右上角新增</div>
         <div v-for="(item,i) in form.studyList" :key="i" class="experience-card">
-          <div class="exp-header"><span>学习经历 {{i+1}}</span><span class="del-btn" @click="form.studyList.splice(i,1)">删除</span></div>
-          <div class="exp-row"><div class="exp-field"><label>学历类型</label><select v-model="item.degreeType"><option value="">请选择</option><option>博士</option><option>硕士</option><option>本科</option><option>大专</option></select></div></div>
-          <div class="exp-row"><div class="exp-field"><label>毕业院校</label><input v-model="item.school" placeholder="请输入毕业院校" /></div></div>
-          <div class="exp-row"><div class="exp-field"><label>专业</label><input v-model="item.major" placeholder="请输入专业" /></div></div>
+          <div class="exp-header"><span>学习经历 {{i+1}}</span><span class="del-btn" @click="removeStudy(i)">删除</span></div>
+          <div class="exp-row"><div class="exp-field"><label>学历类型</label><select v-model="item.degreeType"><option value="">请选择</option><option value="博士">博士</option><option value="硕士">硕士</option><option value="本科">本科</option><option value="大专">大专</option></select></div></div>
           <div class="exp-row two-col"><div class="exp-field"><label>入学日期</label><input v-model="item.entryDate" type="date" /></div><div class="exp-field"><label>毕业日期</label><input v-model="item.gradDate" type="date" /></div></div>
+          <div class="exp-row two-col"><div class="exp-field"><label>毕业院校</label><input v-model="item.school" placeholder="请输入" /></div><div class="exp-field"><label>专业</label><input v-model="item.major" placeholder="请输入" /></div></div>
         </div>
       </div>
-    </div>
-    <div class="bottom-actions">
-      <button class="cancel-btn" @click="handleCancel">取消</button>
-      <button class="submit-btn" @click="handleSubmit">提交审核</button>
+      <div class="bottom-actions">
+        <button class="cancel-btn" @click="handleCancel">取消</button>
+        <button class="submit-btn" @click="handleSubmit">提交审核</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, onActivated, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter(); const route = useRoute()
 const base = computed(() => route.path.startsWith('/college') ? '/college' : '/collection')
+const STORAGE_KEY = 'profile_edit_' + (localStorage.getItem('username') || '')
 
-const updateTime = ref('')
+const updateTime = ref(new Date().toLocaleString())
+
 const form = reactive({
-  name: '', gender: '', birth: '', politicalStatus: '', department: '',
-  type: '', position: '', education: '', degree: '',
+  idPhoto: '', lifePhotos: [],
+  name: '', employeeNo: '', gender: '', birth: '', politicalStatus: '',
+  department: '', type: '', position: '', education: '', degree: '',
   campus: '', office: '', phone: '',
-  idPhoto: '', lifePhotos: [], workList: [], studyList: []
+  workList: [], studyList: []
 })
+
+function saveToStorage() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...form })) } catch (e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const data = JSON.parse(raw)
+      Object.keys(data).forEach(k => { if (k in form) form[k] = data[k] })
+    }
+  } catch (e) {}
+}
 
 async function loadProfile() {
   try {
@@ -92,6 +132,7 @@ async function loadProfile() {
     if (res.data) {
       const p = res.data
       form.name = p.name || ''
+      form.employeeNo = p.employeeNo || ''
       form.gender = p.gender || ''
       form.birth = p.birth || ''
       form.politicalStatus = p.politicalStatus || ''
@@ -107,44 +148,42 @@ async function loadProfile() {
       try { form.lifePhotos = JSON.parse(p.lifePhotos || '[]') } catch { form.lifePhotos = [] }
       try { form.workList = JSON.parse(p.workList || '[]') } catch { form.workList = [] }
       try { form.studyList = JSON.parse(p.studyList || '[]') } catch { form.studyList = [] }
-      updateTime.value = p.updateTime || new Date().toLocaleString()
+      if (p.updateTime) updateTime.value = p.updateTime
     }
   } catch (e) { console.error('加载个人信息失败', e) }
 }
 
-onMounted(loadProfile)
+onMounted(() => { loadProfile().then(() => loadFromStorage()) })
+onActivated(() => loadFromStorage())
 
-function goAddWork() { router.push(base.value + '/work/add') }
-function goAddStudy() { router.push(base.value + '/study/add') }
+watch(form, () => saveToStorage(), { deep: true })
 
 function uploadIdPhoto() {
-  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'
-  i.onchange = e => {
-    const f = e.target.files[0]
-    if (f && f.size > 10 * 1024 * 1024) { ElMessage.warning('图片大小不能超过10M'); return }
-    if (f) { const r = new FileReader(); r.onload = ev => form.idPhoto = ev.target.result; r.readAsDataURL(f) }
-  }
-  i.click()
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'
+  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { form.idPhoto = ev.target.result }; r.readAsDataURL(f) } }
+  inp.click()
 }
 
-function uploadLifePhoto(idx) {
-  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'
-  i.onchange = e => {
-    const f = e.target.files[0]
-    if (f && f.size > 10 * 1024 * 1024) { ElMessage.warning('图片大小不能超过10M'); return }
-    if (f) { const r = new FileReader(); r.onload = ev => form.lifePhotos[idx] = ev.target.result; r.readAsDataURL(f) }
-  }
-  i.click()
+function uploadLifePhoto(i) {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'
+  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { form.lifePhotos[i] = ev.target.result }; r.readAsDataURL(f) } }
+  inp.click()
 }
 
-function handleCancel() { router.push(base.value + '/profile') }
+function removeWork(i) { form.workList.splice(i, 1) }
+function removeStudy(i) { form.studyList.splice(i, 1) }
+
+function goAddWork() { saveToStorage(); router.push(base.value + '/work/add?source=profile') }
+function goAddStudy() { saveToStorage(); router.push(base.value + '/study/add?source=profile') }
+
+function handleCancel() { localStorage.removeItem(STORAGE_KEY); router.push(base.value + '/profile') }
 
 async function handleSubmit() {
   if (!form.name) { ElMessage.warning('请填写姓名'); return }
   if (!form.education) { ElMessage.warning('请选择最高学历'); return }
 
   const data = {
-    name: form.name, gender: form.gender, birth: form.birth,
+    name: form.name, employeeNo: form.employeeNo, gender: form.gender, birth: form.birth,
     politicalStatus: form.politicalStatus, department: form.department,
     type: form.type, position: form.position, education: form.education,
     degree: form.degree, campus: form.campus, office: form.office,
@@ -156,6 +195,7 @@ async function handleSubmit() {
 
   try {
     await request.post('/profile/submit', data)
+    localStorage.removeItem(STORAGE_KEY)
     await ElMessageBox.alert('档案修改已提交审核，请等待学院管理员审核。', '提交成功', { type: 'success' })
     router.push(base.value + '/profile')
   } catch (e) {

@@ -1,26 +1,18 @@
 <template>
   <div class="collection-app">
-    <div class="top-bar"><span class="nav-title">信息采集批次</span></div>
-    <div class="main-content"><router-view /></div>
+    <div class="top-bar"><span class="nav-title">{{ pageTitle }}</span></div>
+    <div class="main-content"><router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view></div>
     <div class="tab-bar">
       <div class="tab-item" :class="{ active: activeTab === 'batch' }" @click="switchTab('batch')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-        </svg>
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="10" x2="12" y2="10"/><line x1="7" y1="14" x2="16" y2="14"/></svg>
         <span>采集批次</span>
       </div>
       <div class="tab-item" :class="{ active: activeTab === 'profile' }" @click="switchTab('profile')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span>个人信息</span>
       </div>
       <div class="tab-item" :class="{ active: activeTab === 'more' }" @click="switchTab('more')">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-        </svg>
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span>更多功能</span>
       </div>
     </div>
@@ -31,16 +23,14 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 const router = useRouter(); const route = useRoute()
-
+const titleMap = { batch: '采集批次', profile: '个人信息', more: '更多功能' }
 const activeTab = computed(() => {
-  const path = route.path
-  if (path.includes('/collection/approval/')) return 'more'
-  if (path.includes('/collection/batch')) return 'batch'
-  if (path.includes('/collection/profile')) return 'profile'
-  if (path.includes('/collection/more')) return 'more'
+  const p = route.path
+  if (p.includes('/collection/more') || p.includes('/collection/approval')) return 'more'
+  if (p.includes('/collection/profile')) return 'profile'
   return 'batch'
 })
-
+const pageTitle = computed(() => titleMap[activeTab.value] || '采集批次')
 function switchTab(tab) { router.push('/collection/' + tab) }
 </script>
 
