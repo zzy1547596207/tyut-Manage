@@ -9,9 +9,8 @@
     </div>
 
     <div class="form-body">
-      <!-- 学历类型 -->
       <div class="field required">
-        <label>学历类型 <span class="star">*</span></label>
+        <label>学历类型<span class="star">*</span></label>
         <select v-model="form.degreeType">
           <option value="">请选择学历类型</option>
           <option value="全日制博士">全日制博士</option>
@@ -24,27 +23,23 @@
         </select>
       </div>
 
-      <!-- 毕业院校 -->
       <div class="field required">
-        <label>毕业院校 <span class="star">*</span></label>
+        <label>毕业院校<span class="star">*</span></label>
         <input v-model="form.school" type="text" placeholder="请输入毕业院校标准全称" />
       </div>
 
-      <!-- 专业 -->
       <div class="field required">
-        <label>专业 <span class="star">*</span></label>
+        <label>专业<span class="star">*</span></label>
         <input v-model="form.major" type="text" placeholder="请输入专业" />
       </div>
 
-      <!-- 入学日期 -->
       <div class="field required">
-        <label>入学日期 <span class="star">*</span></label>
+        <label>入学日期<span class="star">*</span></label>
         <input v-model="form.entryDate" type="date" placeholder="请选择入学日期" />
       </div>
 
-      <!-- 毕业日期 -->
       <div class="field required">
-        <label>毕业日期 <span class="star">*</span></label>
+        <label>毕业日期<span class="star">*</span></label>
         <input v-model="form.gradDate" type="date" placeholder="请选择毕业日期" />
       </div>
 
@@ -58,10 +53,15 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
+
+const batchId = route.query.batchId || ''
+const source = route.query.source || ''
+const STORAGE_KEY = source === 'profile' ? ('profile_edit_' + (localStorage.getItem('username') || '')) : ('collection_form_' + batchId)
 
 const form = reactive({ degreeType: '', school: '', major: '', entryDate: '', gradDate: '' })
 
@@ -77,11 +77,11 @@ function handleSubmit() {
     if (!form[r.key]) { ElMessage.warning('请' + (r.key.includes('Date') ? '选择' : '输入') + r.label); return }
   }
   try {
-    const raw = localStorage.getItem('profile_data')
-    const profile = raw ? JSON.parse(raw) : {}
-    profile.studyList = profile.studyList || []
-    profile.studyList.push({ ...form })
-    localStorage.setItem('profile_data', JSON.stringify(profile))
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const data = raw ? JSON.parse(raw) : {}
+    if (!data.studyList || !Array.isArray(data.studyList)) data.studyList = []
+    data.studyList.push({ ...form })
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch (e) {}
   ElMessage.success('新增成功')
   router.back()

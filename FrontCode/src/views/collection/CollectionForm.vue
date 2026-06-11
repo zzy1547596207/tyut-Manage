@@ -30,7 +30,7 @@
       <div class="section"><div class="section-header"><span class="section-title">工作经历</span><span class="add-btn" @click="goAddWork">+ 新增</span></div>
         <div v-if="form.workList.length===0" class="empty-hint">暂无工作经历，点击右上角新增</div>
         <div v-for="(item,i) in form.workList" :key="i" class="experience-card">
-          <div class="exp-header"><span>工作经历 {{i+1}}</span><span class="del-btn" @click="form.workList.splice(i,1)">删除</span></div>
+          <div class="exp-header"><span>工作经历 {{i+1}}</span><span class="del-btn" @click="removeWork(i)">删除</span></div>
           <div class="exp-row"><div class="exp-field"><label>任职单位</label><input v-model="item.company" placeholder="请输入" /></div></div>
           <div class="exp-row two-col"><div class="exp-field"><label>开始日期</label><input v-model="item.startDate" type="date" /></div><div class="exp-field"><label>结束日期</label><input v-model="item.endDate" type="date" /></div></div>
           <div class="exp-row"><div class="exp-field"><label>任职类别</label><input v-model="item.category" placeholder="如：专职辅导员" /></div></div>
@@ -41,23 +41,22 @@
       <div class="section"><div class="section-header"><span class="section-title">学习经历</span><span class="add-btn" @click="goAddStudy">+ 新增</span></div>
         <div v-if="form.studyList.length===0" class="empty-hint">暂无学习经历，点击右上角新增</div>
         <div v-for="(item,i) in form.studyList" :key="i" class="experience-card">
-          <div class="exp-header"><span>学习经历 {{i+1}}</span><span class="del-btn" @click="form.studyList.splice(i,1)">删除</span></div>
+          <div class="exp-header"><span>学习经历 {{i+1}}</span><span class="del-btn" @click="removeStudy(i)">删除</span></div>
           <div class="exp-row"><div class="exp-field"><label>学历类型</label><select v-model="item.degreeType"><option value="">请选择</option><option value="博士">博士</option><option value="硕士">硕士</option><option value="本科">本科</option><option value="大专">大专</option></select></div></div>
-          <div class="exp-row"><div class="exp-field"><label>毕业院校</label><input v-model="item.school" placeholder="请输入毕业院校" /></div></div>
-          <div class="exp-row"><div class="exp-field"><label>专业</label><input v-model="item.major" placeholder="请输入专业" /></div></div>
           <div class="exp-row two-col"><div class="exp-field"><label>入学日期</label><input v-model="item.entryDate" type="date" /></div><div class="exp-field"><label>毕业日期</label><input v-model="item.gradDate" type="date" /></div></div>
+          <div class="exp-row two-col"><div class="exp-field"><label>毕业院校</label><input v-model="item.school" placeholder="请输入" /></div><div class="exp-field"><label>专业</label><input v-model="item.major" placeholder="请输入" /></div></div>
         </div>
       </div>
-    </div>
-    <div class="bottom-actions">
-      <button class="cancel-btn" @click="handleCancel">取消</button>
-      <button class="submit-btn" @click="handleSubmit">提交审核</button>
+      <div class="bottom-actions">
+        <button class="cancel-btn" @click="handleCancel">取消</button>
+        <button class="submit-btn" @click="handleSubmit">提交</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onActivated, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
@@ -67,6 +66,9 @@ const route = useRoute()
 const base = computed(() => route.path.startsWith('/college') ? '/college' : '/collection')
 const batchId = computed(() => route.params.batchId)
 
+const STORAGE_KEY = computed(() => 'collection_form_' + batchId.value)
+const PHOTO_KEY = computed(() => 'collection_photos_' + batchId.value)
+
 const idPhoto = ref('')
 const lifePhotos = ref([])
 
@@ -75,6 +77,46 @@ const form = reactive({
   workList: [],
   studyList: []
 })
+
+function saveToStorage() {
+  try {
+    const data = {
+      education: form.education,
+      workList: form.workList,
+      studyList: form.studyList
+    }
+    localStorage.setItem(STORAGE_KEY.value, JSON.stringify(data))
+  } catch (e) {}
+  savePhotos()
+}
+
+function savePhotos() {
+  try {
+    const photos = {
+      idPhoto: idPhoto.value,
+      lifePhotos: lifePhotos.value.filter(Boolean)
+    }
+    localStorage.setItem(PHOTO_KEY.value, JSON.stringify(photos))
+  } catch (e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY.value)
+    if (raw) {
+      const data = JSON.parse(raw)
+      if (data.education) form.education = data.education
+      if (data.workList && Array.isArray(data.workList)) form.workList = data.workList
+      if (data.studyList && Array.isArray(data.studyList)) form.studyList = data.studyList
+    }
+    const photoRaw = localStorage.getItem(PHOTO_KEY.value)
+    if (photoRaw) {
+      const photos = JSON.parse(photoRaw)
+      if (photos.idPhoto) idPhoto.value = photos.idPhoto
+      if (photos.lifePhotos && Array.isArray(photos.lifePhotos)) lifePhotos.value = photos.lifePhotos
+    }
+  } catch (e) {}
+}
 
 async function loadExisting() {
   try {
@@ -95,24 +137,53 @@ async function loadExisting() {
   } catch (e) { console.error('加载已有数据失败', e) }
 }
 
-onMounted(loadExisting)
+onMounted(() => {
+  loadExisting().then(() => {
+    loadFromStorage()
+  })
+})
+
+onActivated(() => {
+  loadFromStorage()
+})
+
+watch([() => form.workList, () => form.studyList, () => form.education], () => {
+  saveToStorage()
+}, { deep: true })
+
+watch([idPhoto, lifePhotos], () => {
+  savePhotos()
+}, { deep: true })
 
 function uploadIdPhoto() {
   const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'
-  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { idPhoto.value = ev.target.result }; r.readAsDataURL(f) } }
+  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { idPhoto.value = ev.target.result; savePhotos() }; r.readAsDataURL(f) } }
   inp.click()
 }
 
 function uploadLifePhoto(i) {
   const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'
-  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { lifePhotos.value[i] = ev.target.result }; r.readAsDataURL(f) } }
+  inp.onchange = (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { lifePhotos.value[i] = ev.target.result; savePhotos() }; r.readAsDataURL(f) } }
   inp.click()
 }
 
-function goAddWork() { router.push(base.value + '/work/add') }
-function goAddStudy() { router.push(base.value + '/study/add') }
+function removeWork(i) { form.workList.splice(i, 1) }
+function removeStudy(i) { form.studyList.splice(i, 1) }
 
-function handleCancel() { router.push(base.value + '/batch') }
+function goAddWork() {
+  saveToStorage()
+  router.push(base.value + '/work/add?batchId=' + batchId.value)
+}
+function goAddStudy() {
+  saveToStorage()
+  router.push(base.value + '/study/add?batchId=' + batchId.value)
+}
+
+function handleCancel() { 
+  localStorage.removeItem(STORAGE_KEY.value)
+  localStorage.removeItem(PHOTO_KEY.value)
+  router.push(base.value + '/batch') 
+}
 
 async function handleSubmit() {
   if (!form.education) { ElMessage.warning('请选择最高学历'); return }
@@ -129,6 +200,8 @@ async function handleSubmit() {
 
   try {
     await request.post('/submission/submit', data)
+    localStorage.removeItem(STORAGE_KEY.value)
+    localStorage.removeItem(PHOTO_KEY.value)
     await ElMessageBox.alert('信息采集提交成功！', '提示', { type: 'success' })
     router.push(base.value + '/batch')
   } catch (e) {

@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <div class="college-app">
     <div class="top-bar"><span class="nav-title">{{ pageTitle }}</span></div>
-    <div class="main-content"><router-view /></div>
+    <div class="main-content"><router-view v-slot="{ Component }"><keep-alive><component :is="Component" /></keep-alive></router-view></div>
     <div class="tab-bar">
       <div v-if="!isAdmin" class="tab-item" :class="{ active: activeTab === 'review' }" @click="switchTab('review')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -15,7 +15,7 @@
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span>通讯录</span>
       </div>
-      <div class="tab-item" :class="{ active: activeTab === 'batch' }" @click="switchTab('batch')">
+      <div v-if="!isAdmin" class="tab-item" :class="{ active: activeTab === 'batch' }" @click="switchTab('batch')">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span>采集批次</span>
       </div>
